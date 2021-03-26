@@ -1,0 +1,88 @@
+---
+title: "My GGPlot Experiments
+output: github_document
+---
+
+## Giving This a Shot
+
+I'll put my notes here, followed by code:
+
+So I can do a scatterplot by more or less using the following code ...
+
+```{scatterplot}
+p <- ggplot(data= ... , mapping=aes(x= ... , y= ... ))
+p+geom_point()
+```
+
+... but replacing ellipses with the data source and the specific X and Y axes for my plot.
+
+To get a smoother line in addition to the plot, I simply use:
+
+```{smoothed scatterplot}
+p+geom_point()+geom_smooth()
+```
+And to make it a logorithmic axis (if I'm feeling really nerdy):
+
+```{logarithmic scatterplot}
+p+geom_point()+geom_smooth(method="gam")+scale_x_log10()
+```
+
+This is a plot with a logarithmic scale, converted to currency, colored purple:
+
+```{log color scale example}
+
+p+geom_point(color="purple")+geom_smooth(method="loess")+scale_x_log10(labels=scales::dollar)
+```
+
+An example of semitransparent dots and a different-colored, thicker line:
+
+```{more variables example}
+p + geom_point(alpha=0.3)+geom_smooth(color="orange", se=FALSE, size=3, method="lm")+scale_x_log10()
+```
+
+A full chart, with title, subtitle, source, correct scale labels:
+
+```{r full chart part 1}
+p <- ggplot(data=gapminder, mapping=aes(x=gdpPercap, y=lifeExp))
+```
+
+```{r full chart part 2}
+p+geom_point(alpha=0.3)+geom_smooth(method="gam")+scale_x_log10(labels=scales::dollar)+labs(x="GDP per Capita", y="Life Expectancy in Years", title="Economic Growth and Life Expectancy", subtitle="Data points are country-years", caption="Source: Gapminder")
+```
+... And this is what turns up, right here, when I run it through RMD instead of the console!
+
+## Plotting ... A MURDER
+
+I'll put my devious plots here.
+
+Here is the basic CoC v. Dem scatterplot:
+
+```{r my plot}
+read_csv("CongsxDems.csv")
+
+ptib <- as_tibble(p)
+
+p <- ggplot(data=ptib, mapping=aes(x=Percentage, y=Dems))
+
+p+geom_point()
+```
+
+And here is the fancier version with a smoothed line, title and labels:
+
+```{r my fancy plot}
+read_csv("CongsxDems.csv")
+
+ptib <- as_tibble(p)
+
+p <- ggplot(data=ptib, mapping=aes(x=Percentage, y=Dems))
+
+p+geom_point()+geom_smooth(method="gam")+labs(x="Cities with Churches of Christ, 1976", y="Vote for Joe Biden, 2020", title="Churches of Christ in 1976 vs. Democratic Support in 2020", subtitle="States with a higher share of cities containing at least one Church of Christ in 1976 tended to be less supportive of Democrats in 2020.", caption="Sources: Firm Foundation, Politico")
+
+```
+Using tribbles seems to cause problems for R Markdown, however.
+
+count <- p %>% 
+  group_by(Year) %>%
+  count(Year, Type, State) %>%
+  filter (n > 10) %>%
+  filter (!State == "*France")
